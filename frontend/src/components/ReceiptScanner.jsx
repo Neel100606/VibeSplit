@@ -1,9 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import axios from 'axios';
 import { UploadCloud, Sparkles, AlertCircle, FileImage, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+import { api } from '../config';
 
 /**
  * ReceiptScanner Component
@@ -92,10 +90,9 @@ export default function ReceiptScanner({ onScanSuccess }) {
     formData.append('receipt', file);
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/ai/scan-receipt`, formData, {
+      const response = await api.post('/ai/scan-receipt', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${token}`,
         },
       });
 

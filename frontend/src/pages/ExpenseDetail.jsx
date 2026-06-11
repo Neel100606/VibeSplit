@@ -4,8 +4,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import ConfirmModal from '../components/ConfirmModal.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+import { API_URL as API_BASE_URL } from '../config.js';
 
 const formatCurrency = (value) =>
   new Intl.NumberFormat('en-US', {

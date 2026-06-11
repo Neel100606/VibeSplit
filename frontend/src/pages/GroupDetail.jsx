@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import axios from 'axios';
 import { 
   PieChart, 
   Pie, 
@@ -40,8 +39,7 @@ import AddExpenseModal from '../components/Expenses/AddExpenseModal.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
 import { useSocket } from '../context/SocketContext.jsx';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+import { api, API_URL as API_BASE_URL } from '../config';
 
 const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#ec4899', '#f43f5e', '#06b6d4'];
 
@@ -104,10 +102,7 @@ export default function GroupDetail() {
   const downloadReport = async () => {
     try {
       setIsDownloading(true);
-      const response = await axios.get(`${API_BASE_URL}/groups/${id}/report/pdf`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        },
+      const response = await api.get(`/groups/${id}/report/pdf`, {
         responseType: 'blob'
       });
 

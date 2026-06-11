@@ -16,8 +16,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import { useSocket } from '../../context/SocketContext';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+import { API_URL as API_BASE_URL } from '../../config';
 
 const NavItem = ({ to, icon: Icon, label, active, onClick }) => (
   <Link 

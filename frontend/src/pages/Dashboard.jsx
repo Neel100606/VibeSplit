@@ -9,8 +9,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+import { API_URL as API_BASE_URL } from '../config';
 
 const formatCurrency = (value) =>
   new Intl.NumberFormat('en-US', {
