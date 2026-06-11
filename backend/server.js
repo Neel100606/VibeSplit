@@ -22,7 +22,7 @@ const io = initSocket(server);
 app.set('io', io);
 
 const PORT = process.env.PORT || 5000;
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/splitwise_clone';
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/vibesplit';
 
 // Middleware
 app.use(express.json());
@@ -52,7 +52,7 @@ mongoose.connect(MONGO_URI)
 
 // Initial route
 app.get('/', (req, res) => {
-  res.json({ message: 'Splitwise Clone API' });
+  res.json({ message: 'VibeSplit API' });
 });
 
 // API Routes

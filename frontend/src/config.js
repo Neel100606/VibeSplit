@@ -13,7 +13,7 @@ export const api = axios.create({
 // Automatically inject authorization header if token exists in localStorage
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('splitwise_token');
+    const token = localStorage.getItem('vibesplit_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }

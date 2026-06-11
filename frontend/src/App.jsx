@@ -18,23 +18,7 @@ import VerifyEmail from './pages/VerifyEmail.jsx';
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 
-function PagePlaceholder({ title, description }) {
-  return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-      <h1 className="text-3xl font-semibold tracking-tight text-slate-900">{title}</h1>
-      <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600">{description}</p>
-    </section>
-  );
-}
 
-function HomePage() {
-  return (
-    <PagePlaceholder
-      title="Splitwise Clone"
-      description="The SPA shell is ready. Authentication forms and dashboard features can now be built on top of this routing and context setup."
-    />
-  );
-}
 
 
 function AppShell() {
