@@ -12,10 +12,15 @@
  * @param {number|string} params.amount - The amount to request.
  * @returns {string} The fully constructed UPI deep link URI.
  */
-export function generateUpiLink({ payeeVpa, payeeName }) {
+export const generateUpiLink = ({ payeeVpa, payeeName }) => {
   if (!payeeVpa) return '';
-  return `upi://pay?pa=${payeeVpa}&pn=${encodeURIComponent(payeeName)}&cu=INR`;
-}
+  const encodedName = encodeURIComponent(payeeName);
+  // pa: Payee VPA Address
+  // pn: Payee Name
+  // mc: Merchant Category Code (0000 explicitly forces P2P transaction mode)
+  // mode: 02 specifies a standard SDK/Web intent trigger layout
+  return `upi://pay?pa=${payeeVpa}&pn=${encodedName}&mc=0000&mode=02`;
+};
 
 /**
  * Checks if the current browser session is running on a mobile device.

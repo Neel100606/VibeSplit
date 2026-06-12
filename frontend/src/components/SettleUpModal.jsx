@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Copy, Check, CopyCheck, Landmark } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { generateUpiLink, isMobileDevice } from '../utils/paymentUtils.js';
+import { useToast } from '../context/ToastContext.jsx';
 
 /**
  * SettleUpModal Component
@@ -20,17 +21,18 @@ export default function SettleUpModal({
 }) {
   const [copied, setCopied] = useState(false);
   const isMobile = isMobileDevice();
+  const { addToast } = useToast();
 
   const upiLink = generateUpiLink({
     payeeVpa: receiverUpiId,
     payeeName: receiverName,
-    amount: debtAmount,
   });
 
   const handleCopyUpi = () => {
     if (!receiverUpiId) return;
     navigator.clipboard.writeText(receiverUpiId);
     setCopied(true);
+    addToast('UPI ID copied! Paste it directly into your preferred payment app.', 'success');
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -80,13 +82,23 @@ export default function SettleUpModal({
                   This user has not set up a UPI ID yet. Ask them to add it under their Profile.
                 </div>
               ) : isMobile ? (
-                /* Mobile Deeplink Intent */
-                <a
-                  href={upiLink}
-                  className="flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-500 hover:bg-emerald-400 py-4 text-sm font-black uppercase tracking-widest text-black transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-emerald-500/20 cursor-pointer text-center"
-                >
-                  Pay via GPay / PhonePe
-                </a>
+                /* Mobile Deeplink Intent & Copy Fallback Side-by-Side */
+                <div className="flex w-full gap-3">
+                  <a
+                    href={upiLink}
+                    className="flex-1 flex items-center justify-center gap-2 rounded-2xl bg-emerald-500 hover:bg-emerald-400 py-4 text-sm font-black uppercase tracking-widest text-black transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-emerald-500/20 cursor-pointer text-center"
+                  >
+                    Pay via GPay / PhonePe
+                  </a>
+                  <button
+                    type="button"
+                    onClick={handleCopyUpi}
+                    className="flex items-center justify-center gap-2 px-5 rounded-2xl bg-[#13151A] hover:bg-[#1C1F26] border border-slate-800 text-slate-200 hover:text-white transition-all hover:scale-[1.02] active:scale-[0.98]"
+                    title="Copy UPI ID"
+                  >
+                    {copied ? <Check size={18} className="text-emerald-500" /> : <Copy size={18} />}
+                  </button>
+                </div>
               ) : (
                 /* Desktop QR Code */
                 <div className="flex flex-col items-center gap-4">
