@@ -22,6 +22,13 @@ export const generateUpiLink = ({ payeeVpa, payeeName }) => {
   return `upi://pay?pa=${payeeVpa}&pn=${encodedName}&mc=0000&mode=02`;
 };
 
+export const generateUpiQrString = ({ payeeVpa, payeeName, amount }) => {
+  if (!payeeVpa) return '';
+  const encodedName = encodeURIComponent(payeeName);
+  // Include pa (address), pn (name), am (amount), cu (currency), and mc=0000 (P2P override)
+  return `upi://pay?pa=${payeeVpa}&pn=${encodedName}&am=${Number(amount).toFixed(2)}&cu=INR&mc=0000`;
+};
+
 /**
  * Checks if the current browser session is running on a mobile device.
  * 

@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Copy, Check, CopyCheck, Landmark } from 'lucide-react';
+import { X, Copy, Check } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
-import { generateUpiLink, isMobileDevice } from '../utils/paymentUtils.js';
+import { generateUpiQrString } from '../utils/paymentUtils.js';
 import { useToast } from '../context/ToastContext.jsx';
 
 /**
  * SettleUpModal Component
- * Facilitates peer-to-peer UPI payment settlements.
- * Shows QR Code on Desktop and a deep-link anchor on Mobile.
+ * Facilitates peer-to-peer UPI payment settlements via a visual QR code scanner pattern.
  */
 export default function SettleUpModal({
   isOpen,
@@ -20,12 +19,12 @@ export default function SettleUpModal({
   isSubmitting = false,
 }) {
   const [copied, setCopied] = useState(false);
-  const isMobile = isMobileDevice();
   const { addToast } = useToast();
 
-  const upiLink = generateUpiLink({
+  const upiQrString = generateUpiQrString({
     payeeVpa: receiverUpiId,
     payeeName: receiverName,
+    amount: debtAmount,
   });
 
   const handleCopyUpi = () => {
@@ -59,74 +58,67 @@ export default function SettleUpModal({
             </button>
 
             {/* Header */}
-            <div className="mb-6">
-              <h2 className="text-2xl font-extrabold tracking-tighter text-white">Settle Up</h2>
-              <p className="text-sm font-medium text-slate-500 mt-1">
-                Paying <span className="text-emerald-500 font-bold">{receiverName}</span>
+            <div className="mb-6 text-center">
+              <h2 className="text-2xl font-extrabold tracking-tighter text-white">Scan to Pay</h2>
+              <p className="text-xs font-medium text-slate-500 mt-1">
+                Scan using Google Pay, PhonePe, BHIM, or any UPI app
               </p>
             </div>
 
-            {/* Amount Summary */}
-            <div className="flex flex-col items-center justify-center bg-[#0D0F12]/80 border border-slate-800 rounded-2xl py-6 mb-6">
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">Amount Owed</span>
-              <div className="flex items-baseline text-4xl font-extrabold text-white">
-                <span className="text-emerald-500 mr-1 text-2xl font-bold">$</span>
-                <span>{Number(debtAmount || 0).toFixed(2)}</span>
-              </div>
-            </div>
-
             {/* Interactive UPI Area */}
-            <div className="flex flex-col items-center gap-6 mb-6">
+            <div className="flex flex-col items-center mb-6">
               {!receiverUpiId ? (
                 <div className="text-center text-xs font-bold text-rose-500 bg-rose-500/10 p-4 rounded-2xl w-full border border-rose-500/20">
                   This user has not set up a UPI ID yet. Ask them to add it under their Profile.
                 </div>
-              ) : isMobile ? (
-                /* Mobile Deeplink Intent & Copy Fallback Side-by-Side */
-                <div className="flex w-full gap-3">
-                  <a
-                    href={upiLink}
-                    className="flex-1 flex items-center justify-center gap-2 rounded-2xl bg-emerald-500 hover:bg-emerald-400 py-4 text-sm font-black uppercase tracking-widest text-black transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-emerald-500/20 cursor-pointer text-center"
-                  >
-                    Pay via GPay / PhonePe
-                  </a>
-                  <button
-                    type="button"
-                    onClick={handleCopyUpi}
-                    className="flex items-center justify-center gap-2 px-5 rounded-2xl bg-[#13151A] hover:bg-[#1C1F26] border border-slate-800 text-slate-200 hover:text-white transition-all hover:scale-[1.02] active:scale-[0.98]"
-                    title="Copy UPI ID"
-                  >
-                    {copied ? <Check size={18} className="text-emerald-500" /> : <Copy size={18} />}
-                  </button>
-                </div>
               ) : (
-                /* Desktop QR Code */
-                <div className="flex flex-col items-center gap-4">
-                  <div className="bg-white p-4 rounded-2xl shadow-xl flex items-center justify-center">
-                    <QRCodeSVG value={upiLink} size={180} />
+                <>
+                  {/* The Visual QR Code */}
+                  <div className="bg-white p-5 rounded-3xl shadow-2xl flex items-center justify-center mb-6 border border-white/20">
+                    <QRCodeSVG value={upiQrString} size={200} />
                   </div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                    Scan using Google Pay, PhonePe, or BHIM
-                  </p>
-                </div>
-              )}
 
-              {/* UPI VPA Fallback Copy Option */}
-              {receiverUpiId && (
-                <div className="w-full flex items-center justify-between rounded-xl bg-[#0D0F12] border border-slate-800 px-4 py-3 text-xs">
-                  <div className="min-w-0 flex-1 mr-2">
-                    <p className="text-[9px] font-black uppercase tracking-wider text-slate-600 mb-0.5">UPI ID (VPA)</p>
-                    <p className="text-slate-300 font-bold truncate">{receiverUpiId}</p>
+                  {/* Payment Context Metadata & Fallback Actions */}
+                  <div className="w-full bg-[#0D0F12] border border-slate-800 rounded-2xl p-5 space-y-4">
+                    {/* Payee Name & Amount */}
+                    <div className="flex justify-between items-center border-b border-white/5 pb-3">
+                      <div className="min-w-0">
+                        <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 block mb-0.5">Payee</span>
+                        <span className="text-white font-bold text-sm truncate block">{receiverName}</span>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 block mb-0.5">Amount</span>
+                        <span className="text-emerald-400 font-extrabold text-xl">₹{Number(debtAmount || 0).toFixed(2)}</span>
+                      </div>
+                    </div>
+
+                    {/* UPI ID & Copy button next to it */}
+                    <div className="flex items-center justify-between gap-4 pt-1">
+                      <div className="min-w-0 flex-1">
+                        <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 block mb-0.5">UPI ID (VPA)</span>
+                        <span className="text-slate-300 font-bold text-xs block truncate">{receiverUpiId}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleCopyUpi}
+                        className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/10 transition-all font-bold text-xs shrink-0 active:scale-95"
+                        title="Copy UPI ID"
+                      >
+                        {copied ? (
+                          <>
+                            <Check size={14} className="text-emerald-500" />
+                            <span>Copied</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy size={14} />
+                            <span>Copy UPI ID</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={handleCopyUpi}
-                    className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white transition-colors shrink-0"
-                    title="Copy UPI ID"
-                  >
-                    {copied ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
-                  </button>
-                </div>
+                </>
               )}
             </div>
 
