@@ -12,9 +12,9 @@
  * @param {number|string} params.amount - The amount to request.
  * @returns {string} The fully constructed UPI deep link URI.
  */
-export function generateUpiLink({ payeeVpa, payeeName, amount }) {
+export function generateUpiLink({ payeeVpa, payeeName }) {
   if (!payeeVpa) return '';
-  return `upi://pay?pa=${payeeVpa}&pn=${encodeURIComponent(payeeName)}&am=${amount}&cu=INR`;
+  return `upi://pay?pa=${payeeVpa}&pn=${encodeURIComponent(payeeName)}&cu=INR`;
 }
 
 /**
