@@ -50,6 +50,8 @@ export const signupUser = async (req, res) => {
 
     await newUser.save();
 
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+
     // Send Welcome/Verification email
     try {
       await sendEmail({
@@ -61,10 +63,10 @@ export const signupUser = async (req, res) => {
             <p style="font-size: 16px; line-height: 1.6; color: #cbd5e1;">Hi ${name},</p>
             <p style="font-size: 16px; line-height: 1.6; color: #cbd5e1;">Thank you for joining VibeSplit, the elite expense-sharing platform. To finalize your setup and verify your email, please click the secure button below:</p>
             <div style="margin: 30px 0; text-align: center;">
-              <a href="http://localhost:5173/verify/${verificationToken}" style="background-color: #10b981; color: #000000; text-decoration: none; padding: 12px 30px; border-radius: 12px; font-weight: 800; font-size: 14px; display: inline-block; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);">Verify Email Address</a>
+              <a href="${frontendUrl}/verify/${verificationToken}" style="background-color: #10b981; color: #000000; text-decoration: none; padding: 12px 30px; border-radius: 12px; font-weight: 800; font-size: 14px; display: inline-block; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);">Verify Email Address</a>
             </div>
             <p style="font-size: 12px; line-height: 1.6; color: #64748b; margin-top: 20px;">If the button above does not work, copy and paste this URL into your browser:</p>
-            <p style="font-size: 12px; line-height: 1.6; color: #10b981; word-break: break-all;">http://localhost:5173/verify/${verificationToken}</p>
+            <p style="font-size: 12px; line-height: 1.6; color: #10b981; word-break: break-all;">${frontendUrl}/verify/${verificationToken}</p>
             <p style="font-size: 14px; line-height: 1.6; color: #64748b; border-top: 1px solid #1e293b; padding-top: 15px; margin-bottom: 0;">If you did not create this account, you can safely ignore this email.</p>
           </div>
         `

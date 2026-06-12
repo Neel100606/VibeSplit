@@ -22,6 +22,25 @@ export function AuthProvider({ children }) {
     setUser(userData);
   };
 
+  const signup = async (formData) => {
+    const response = await fetch(`${API_BASE_URL}/users/signup`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formData),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Unable to sign up.');
+    }
+
+    login(data.token, data.user);
+    return { success: true };
+  };
+
   useEffect(() => {
     const storedToken = localStorage.getItem(TOKEN_STORAGE_KEY);
 
@@ -73,6 +92,7 @@ export function AuthProvider({ children }) {
         isAuthenticated,
         login,
         logout,
+        signup,
       }}
     >
       {children}

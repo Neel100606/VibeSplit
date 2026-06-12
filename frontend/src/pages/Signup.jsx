@@ -9,7 +9,7 @@ import { API_URL as API_BASE_URL } from '../config.js';
 
 export default function Signup() {
   const navigate = useNavigate();
-  const { login, isAuthenticated } = useAuth();
+  const { login, signup, isAuthenticated } = useAuth();
   const { addToast } = useToast();
 
   useEffect(() => {
@@ -37,25 +37,13 @@ export default function Signup() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/users/signup`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Unable to sign up.');
+      const result = await signup(formData);
+      if (result.success) {
+        navigate('/dashboard');
       }
-
-      login(data.token, data.user);
-      navigate('/dashboard');
-    } catch (requestError) {
-      setError(requestError.message || 'Unable to sign up.');
-      addToast(requestError.message || 'Unable to sign up.', 'error');
+    } catch (err) {
+      setError(err.message || 'Unable to sign up.');
+      addToast(err.message || 'Unable to sign up.', 'error');
     } finally {
       setIsSubmitting(false);
     }
