@@ -5,7 +5,8 @@ let io;
 export const initSocket = (server) => {
   const allowedOrigins = [
     process.env.FRONTEND_URL,
-    'http://localhost:5173'
+    'http://localhost:5173',
+    'https://vibe-split-six.vercel.app'
   ].filter(Boolean);
 
   io = new Server(server, {
