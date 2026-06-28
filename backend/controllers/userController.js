@@ -3,7 +3,6 @@ import crypto from 'crypto';
 import { OAuth2Client } from 'google-auth-library';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
-import sendEmail from '../utils/sendEmail.js';
 
 const googleClient = new OAuth2Client();
 
@@ -36,42 +35,15 @@ export const signupUser = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
-    // Generate random 20-character verification token
-    const verificationToken = crypto.randomBytes(10).toString('hex');
-
-    // Create new user
+    // Create new user (automatically verified as email is deprecated)
     const newUser = new User({
       name,
       email,
       passwordHash,
-      verificationToken,
-      isVerified: false,
+      isVerified: true,
     });
 
     await newUser.save();
-
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-
-    // Send Welcome/Verification email (Fire-and-forget to prevent blocking the HTTP response)
-    sendEmail({
-      to: newUser.email,
-      subject: 'Welcome to VibeSplit - Verify Your Email',
-      html: `
-        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0c0d10; color: #ffffff; padding: 30px; border-radius: 20px; max-width: 600px; margin: 0 auto; border: 1px solid #1e293b;">
-          <h2 style="color: #10b981; font-size: 24px; margin-top: 0; font-weight: 800; border-bottom: 1px solid #1e293b; padding-bottom: 15px;">Welcome to VibeSplit!</h2>
-          <p style="font-size: 16px; line-height: 1.6; color: #cbd5e1;">Hi ${name},</p>
-          <p style="font-size: 16px; line-height: 1.6; color: #cbd5e1;">Thank you for joining VibeSplit, the elite expense-sharing platform. To finalize your setup and verify your email, please click the secure button below:</p>
-          <div style="margin: 30px 0; text-align: center;">
-            <a href="${frontendUrl}/verify/${verificationToken}" style="background-color: #10b981; color: #000000; text-decoration: none; padding: 12px 30px; border-radius: 12px; font-weight: 800; font-size: 14px; display: inline-block; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);">Verify Email Address</a>
-          </div>
-          <p style="font-size: 12px; line-height: 1.6; color: #64748b; margin-top: 20px;">If the button above does not work, copy and paste this URL into your browser:</p>
-          <p style="font-size: 12px; line-height: 1.6; color: #10b981; word-break: break-all;">${frontendUrl}/verify/${verificationToken}</p>
-          <p style="font-size: 14px; line-height: 1.6; color: #64748b; border-top: 1px solid #1e293b; padding-top: 15px; margin-bottom: 0;">If you did not create this account, you can safely ignore this email.</p>
-        </div>
-      `
-    }).catch((emailError) => {
-      console.error('Signup verification email failed to send:', emailError);
-    });
 
     // Generate token
     const token = generateToken(newUser._id);

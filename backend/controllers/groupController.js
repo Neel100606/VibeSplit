@@ -7,7 +7,6 @@ import User from '../models/User.js';
 import Notification from '../models/Notification.js';
 import { simplifyDebts } from '../utils/debtSimplifier.js';
 import { getIO } from '../utils/socket.js';
-import sendEmail from '../utils/sendEmail.js';
 
 export const getUserGroups = async (req, res) => {
   try {
@@ -235,15 +234,16 @@ export const sendNudge = async (req, res) => {
       return res.status(400).json({ error: 'Receiver ID is required.' });
     }
 
-    // Anti-spam check: 24h cooldown
-    const lastReminder = await Notification.findOne({
+    // Anti-spam check: 3 reminders per person every 24 hours (per sender)
+    const reminderCount = await Notification.countDocuments({
+      senderId: req.user._id,
       recipientId: receiverId,
       type: 'reminder',
       createdAt: { $gt: new Date(Date.now() - 24 * 60 * 60 * 1000) }
     });
 
-    if (lastReminder) {
-      return res.status(429).json({ error: 'You can only send one reminder per person every 24 hours.' });
+    if (reminderCount >= 3) {
+      return res.status(429).json({ error: 'You can only send up to 3 reminders to the same person every 24 hours.' });
     }
 
     const group = await Group.findById(id);
@@ -258,6 +258,7 @@ export const sendNudge = async (req, res) => {
 
     const notification = new Notification({
       recipientId: receiverId,
+      senderId: req.user._id,
       type: 'reminder',
       message: `${req.user.name} sent a gentle reminder to settle your balances in ${group.name}`,
       link: `/groups/${id}`
@@ -267,24 +268,6 @@ export const sendNudge = async (req, res) => {
 
     const io = getIO();
     io.to(receiverId.toString()).emit('newNotification');
-
-    // Fire-and-forget email notification
-    sendEmail({
-      to: receiver.email,
-      subject: `VibeSplit - Settle up reminder in ${group.name}`,
-      html: `
-        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0c0d10; color: #ffffff; padding: 30px; border-radius: 20px; max-width: 600px; margin: 0 auto; border: 1px solid #1e293b;">
-          <h2 style="color: #10b981; font-size: 24px; margin-top: 0; font-weight: 800; border-bottom: 1px solid #1e293b; padding-bottom: 15px;">Balance Nudge on VibeSplit</h2>
-          <p style="font-size: 16px; line-height: 1.6; color: #cbd5e1;">Hi ${receiver.name},</p>
-          <p style="font-size: 16px; line-height: 1.6; color: #cbd5e1;"><strong>${req.user.name}</strong> has sent you a gentle reminder to settle your outstanding balances in the group <strong>${group.name}</strong>.</p>
-          <div style="margin: 30px 0; text-align: center;">
-            <a href="http://localhost:5173/groups/${group._id}" style="background-color: #10b981; color: #000000; text-decoration: none; padding: 12px 30px; border-radius: 12px; font-weight: 800; font-size: 14px; display: inline-block; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);">Settle Up in VibeSplit</a>
-          </div>
-          <p style="font-size: 14px; line-height: 1.6; color: #cbd5e1; margin-top: 20px;">Or verify your profile settings if you've already completed the payment.</p>
-          <p style="font-size: 12px; line-height: 1.6; color: #64748b; border-top: 1px solid #1e293b; padding-top: 15px; margin-bottom: 0;">If you have already settled, please confirm with ${req.user.name} directly on the VibeSplit app.</p>
-        </div>
-      `
-    }).catch(err => console.error('Failed to send nudge email:', err));
 
     res.json({ message: 'Nudge sent successfully!' });
   } catch (error) {

@@ -1,7 +1,7 @@
+import 'dotenv/config';
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import http from 'http';
 import { initSocket } from './utils/socket.js';
 
@@ -11,7 +11,6 @@ import groupRoutes from './routes/groupRoutes.js';
 import expenseRoutes from './routes/expenseRoutes.js';
 import aiRoutes from './routes/aiRoutes.js';
 
-dotenv.config();
 
 const app = express();
 

@@ -135,7 +135,10 @@ export default function GroupDetail() {
         body: JSON.stringify({ receiverId }),
       });
 
-      if (!response.ok) throw new Error('Unable to send reminder.');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Unable to send reminder.');
+      }
       
       addToast('Reminder sent successfully!', 'success');
       
